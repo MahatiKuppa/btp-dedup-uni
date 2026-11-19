@@ -1,0 +1,74 @@
+{
+ "uni1_full": {
+  "upstream_pipeline_k257": {
+   "Adjusted Rand Index (ARI)": 0.4391725995378114,
+   "Fowlkes-Mallows Index": 0.44332020865515503,
+   "Normalized Mutual Information (NMI)": 0.8453464579351407,
+   "Homogeneity": 0.8404366404801011,
+   "Completeness": 0.8503139786422544,
+   "precision@1": 0.9944,
+   "precision@5": 0.946
+  },
+  "old_k250_labels_rescored": {
+   "Adjusted Rand Index (ARI)": 0.46528819152130463,
+   "Fowlkes-Mallows Index": 0.4690940915380049,
+   "Normalized Mutual Information (NMI)": 0.8468423820956897,
+   "Homogeneity": 0.8408659397185185,
+   "Completeness": 0.852904387564986
+  }
+ },
+ "uni1_pca128": {
+  "upstream_pipeline_k257": {
+   "Adjusted Rand Index (ARI)": 0.4495551223360915,
+   "Fowlkes-Mallows Index": 0.45269746908270514,
+   "Normalized Mutual Information (NMI)": 0.8431827737937909,
+   "Homogeneity": 0.8397747618248488,
+   "Completeness": 0.8466185595726854,
+   "precision@1": 0.9914,
+   "precision@5": 0.93008
+  },
+  "old_k250_labels_rescored": {
+   "Adjusted Rand Index (ARI)": 0.4309972595680506,
+   "Fowlkes-Mallows Index": 0.4349016827088108,
+   "Normalized Mutual Information (NMI)": 0.8351171271490592,
+   "Homogeneity": 0.828987413529121,
+   "Completeness": 0.8413381649167002
+  }
+ },
+ "resnet50_full": {
+  "upstream_pipeline_k257": {
+   "Adjusted Rand Index (ARI)": 0.44721375378105993,
+   "Fowlkes-Mallows Index": 0.4501633876196221,
+   "Normalized Mutual Information (NMI)": 0.8310257292254688,
+   "Homogeneity": 0.8279058035496492,
+   "Completeness": 0.8341692584485455,
+   "precision@1": 0.9862,
+   "precision@5": 0.91316
+  },
+  "old_k250_labels_rescored": {
+   "Adjusted Rand Index (ARI)": 0.4303516240255097,
+   "Fowlkes-Mallows Index": 0.43415942463269525,
+   "Normalized Mutual Information (NMI)": 0.8258624273574453,
+   "Homogeneity": 0.8197310761311318,
+   "Completeness": 0.8320861912695295
+  }
+ },
+ "resnet50_pca128": {
+  "upstream_pipeline_k257": {
+   "Adjusted Rand Index (ARI)": 0.43007554748941385,
+   "Fowlkes-Mallows Index": 0.4334686249478673,
+   "Normalized Mutual Information (NMI)": 0.8287543452805641,
+   "Homogeneity": 0.82501914672535,
+   "Completeness": 0.8325235191941861,
+   "precision@1": 0.9854,
+   "precision@5": 0.90744
+  },
+  "old_k250_labels_rescored": {
+   "Adjusted Rand Index (ARI)": 0.4523474208198608,
+   "Fowlkes-Mallows Index": 0.4556605051691968,
+   "Normalized Mutual Information (NMI)": 0.8336833027450142,
+   "Homogeneity": 0.8290966467676762,
+   "Completeness": 0.8383209888209305
+  }
+ }
+}

@@ -1,0 +1,48 @@
+{
+ "257": {
+  "seed42_upstream_metrics": {
+   "Adjusted Rand Index (ARI)": 0.6434405489927674,
+   "Fowlkes-Mallows Index": 0.6463779767013803,
+   "Normalized Mutual Information (NMI)": 0.9153771956087022,
+   "Homogeneity": 0.9115056735308417,
+   "Completeness": 0.9192817457148171
+  },
+  "seeds0_9_mean": {
+   "Adjusted Rand Index (ARI)": 0.6627668017560402,
+   "Fowlkes-Mallows Index": 0.6650396612341145,
+   "Normalized Mutual Information (NMI)": 0.9183106498763038,
+   "Homogeneity": 0.9153928196777328,
+   "Completeness": 0.9212478417479725
+  },
+  "seeds0_9_sd": {
+   "Adjusted Rand Index (ARI)": 0.010978475495214456,
+   "Fowlkes-Mallows Index": 0.01076296767709388,
+   "Normalized Mutual Information (NMI)": 0.0030598687086922363,
+   "Homogeneity": 0.003391766009784396,
+   "Completeness": 0.002810449875133038
+  }
+ },
+ "250": {
+  "seed42_upstream_metrics": {
+   "Adjusted Rand Index (ARI)": 0.6401140599824104,
+   "Fowlkes-Mallows Index": 0.6436859307624029,
+   "Normalized Mutual Information (NMI)": 0.9135880385964551,
+   "Homogeneity": 0.9074869442547056,
+   "Completeness": 0.9197717243216186
+  },
+  "seeds0_9_mean": {
+   "Adjusted Rand Index (ARI)": 0.6596783572669235,
+   "Fowlkes-Mallows Index": 0.6625065195319033,
+   "Normalized Mutual Information (NMI)": 0.9172353625788405,
+   "Homogeneity": 0.9120366836152576,
+   "Completeness": 0.9224941833394456
+  },
+  "seeds0_9_sd": {
+   "Adjusted Rand Index (ARI)": 0.012823797426146383,
+   "Fowlkes-Mallows Index": 0.012591875109516171,
+   "Normalized Mutual Information (NMI)": 0.0031443646969253826,
+   "Homogeneity": 0.0033747088104197536,
+   "Completeness": 0.0029798282731812393
+  }
+ }
+}

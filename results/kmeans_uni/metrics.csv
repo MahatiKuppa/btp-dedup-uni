@@ -1,0 +1,2 @@
+embedding,dim,k,n_images,intra_variance,inter_variance,separation_ratio,size_min,size_max,size_mean,size_std,n_small_lt5,n_large_gt40
+uni,1024,250,5000,0.09489149780273437,0.5451662627365066,5.745153942767644,3,70,20.0,10.166612021711067,2,12

@@ -1,0 +1,16 @@
+# Install torch CPU-only FIRST, otherwise pip pulls multi-GB CUDA wheels:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# then:
+#   pip install -r requirements.txt
+torch>=2.0.1
+torchvision
+# Mahmood Lab's official pin (mahmoodlab/UNI setup.py).
+timm==0.9.8
+# Also from UNI's setup.py.
+numpy<2
+# timm 0.9.8 predates huggingface_hub 1.x; keep the hub and datasets on the 0.x-compatible line.
+huggingface_hub>=0.23,<1.0
+datasets>=2.18,<4
+python-dotenv
+tqdm
+pillow

@@ -1,0 +1,9 @@
+imagenet_resnet18-last-layer	OK	(2, 512)	11M params	5s
+imagenet_resnet50-clam-extractor	OK	(2, 1024)	9M params	46s
+dinov2_vits14	OK	(2, 384)	22M params	23s
+dinov2_vitb14	OK	(2, 768)	87M params	38s
+simclr-tcga-lung_resnet18-2.5x	OK	(2, 512)	11M params	0s
+simclr-tcga-lung_resnet18-10x	OK	(2, 512)	11M params	0s
+owkin-phikon	OK	(2, 768)	86M params	39s
+UNI	OK	(2, 1024)	303M params	146s
+prov-gigapath	FAIL	GatedRepoError: 403 Client Error. (Request ID: Root=1-6adadfca-692d2e9764118f76257cb95b;807f7bbe-465b-4f2b-8bb1-af9a		

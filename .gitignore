@@ -1,0 +1,19 @@
+# secrets
+.env
+
+# large / regenerable artifacts
+.hf_cache/
+data/
+markers/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# repro
+third_party/
+venv_repro/
+repro/scratch_eval/
+repro/logs/

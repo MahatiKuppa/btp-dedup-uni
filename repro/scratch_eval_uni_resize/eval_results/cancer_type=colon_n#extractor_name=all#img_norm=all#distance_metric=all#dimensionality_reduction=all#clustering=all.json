@@ -1,0 +1,22 @@
+{
+    "UNI#resize_only#euclidean#NoReduction#kmeans": {
+        "TN": 12422582,
+        "FP": 23221,
+        "FN": 16034,
+        "TP": 35663,
+        "Accuracy": 0.9968589717943589,
+        "Precision": 0.6056483934515319,
+        "Recall": 0.6898466061860457,
+        "F1 Score": 0.6450113491467794,
+        "Specificity": 0.9981342304711074,
+        "Balanced Accuracy": 0.8439904183285765,
+        "Fowlkes-Mallows Index": 0.6463779767013803,
+        "Adjusted Rand Index (ARI)": 0.6434405489927674,
+        "Normalized Mutual Information (NMI)": 0.9153771956087022,
+        "Homogeneity": 0.9115056735308417,
+        "Completeness": 0.9192817457148171,
+        "V-Measure": 0.9153771956087022,
+        "precision@1": 0.9972,
+        "precision@5": 0.98508
+    }
+}
