@@ -1,0 +1,11 @@
+stage,seconds,exit_code
+stage_2_embed_uni,197,1
+stage_2_embed_uni,2255,0
+stage_2_embed_resnet,208,0
+stage_3_kmeans_uni,48,0
+stage_3_kmeans_uni_pca128,26,0
+stage_3_kmeans_resnet,77,0
+stage_3_kmeans_resnet_pca128,26,0
+stage_4_match_groups,3,0
+stage_5_compare,1,0
+stage_6_final_dedup,39,0

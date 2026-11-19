@@ -5,14 +5,15 @@ Run from the project root (needs stage 4):
 
     python3 scripts/stage_6_final_dedup.py
     python3 scripts/stage_6_final_dedup.py --force     # rerun despite the marker
+    python3 scripts/stage_6_final_dedup.py --cls colon_aca
 
 Sharpness = variance of the 3x3 Laplacian of the grayscale image (OpenCV if installed,
 otherwise PIL + numpy with the same kernel and reflect-101 borders). Ties go to the
 lowest filename. Inputs are only read; representatives are copied.
 
 Outputs:
-    data/final/colon_n/*.jpeg             one representative per group_id
-    data/final/colon_n_manifest.csv       my_filename, their_filename, group_id, group_size
+    data/final/<cls>/*.jpeg               one representative per group_id
+    data/final/<cls>_manifest.csv         my_filename, their_filename, group_id, group_size
     markers/stage_6_final_dedup.done
 """
 
@@ -31,13 +32,10 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from common.project import (  # noqa: E402
-    FINAL_DIR,
-    FINAL_MANIFEST,
-    GROUP_MAP_CSV,
-    MARKERS_DIR,
     N_EXPECTED,
     PROJECT_ROOT,
-    RAW_DIR,
+    add_cls_arg,
+    class_paths,
     die,
     ensure_dirs,
     write_json_atomic,
@@ -47,8 +45,6 @@ try:
     import cv2
 except ImportError:
     cv2 = None
-
-MARKER = MARKERS_DIR / "stage_6_final_dedup.done"
 
 
 def laplacian_variance(path: Path) -> float:
@@ -66,10 +62,16 @@ def laplacian_variance(path: Path) -> float:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    add_cls_arg(parser)
     parser.add_argument("--force", action="store_true", help="rerun even if the completion marker exists")
     args = parser.parse_args()
 
-    ensure_dirs()
+    P = class_paths(args.cls)
+    RAW_DIR, GROUP_MAP_CSV = P.raw_dir, P.group_map_csv
+    FINAL_DIR, FINAL_MANIFEST = P.final_dir, P.final_manifest
+    MARKER = P.marker("stage_6_final_dedup")
+
+    ensure_dirs(P)
     if not args.force and MARKER.exists() and FINAL_MANIFEST.exists():
         print("already done (stage 6), skipping")
         return 0
@@ -112,6 +114,7 @@ def main() -> int:
     write_json_atomic(
         MARKER,
         {
+            "class": P.cls,
             "completed": datetime.now().isoformat(timespec="seconds"),
             "n_representatives": n_files,
             "n_groups": int(n_groups),

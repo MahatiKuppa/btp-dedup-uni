@@ -7,7 +7,7 @@ DEPENDENCIES - install these before running:
 
 (scipy, numba and llvmlite arrive as dependencies of those three.)
 
-Run from the project root:
+Run from the project root (add --cls colon_aca for the adenocarcinoma class; default colon_n):
 
     python3 scripts/stage_3_kmeans.py                            # UNI, 1024-d
     python3 scripts/stage_3_kmeans.py --embedding uni_pca128      # UNI, 128-d PCA
@@ -47,11 +47,11 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from common.project import (  # noqa: E402
-    EMBEDDINGS_DIR,
-    MARKERS_DIR,
+    DEFAULT_CLASS,
     N_EXPECTED,
     PROJECT_ROOT,
-    RESULTS_DIR,
+    add_cls_arg,
+    class_paths,
     die,
     ensure_dirs,
     write_json_atomic,
@@ -68,37 +68,46 @@ LARGE_CLUSTER = 40
 SPOT_CHECK_IMAGES = 6
 THUMBNAIL_PX = 256
 
-PATHS_PATH = EMBEDDINGS_DIR / "paths.txt"  # shared: identical across embedding sources
 
-# Base (non-PCA) arms: where the raw embedding matrix lives.
-SOURCES = {
-    "uni": {
-        "path": EMBEDDINGS_DIR / "uni1_full.npy",
-        "dim": 1024,
-        "label": "UNI",
-        "hint": "python3 scripts/stage_2_embed.py",
-    },
-    "resnet": {
-        "path": EMBEDDINGS_DIR / "resnet50_full.npy",
-        "dim": 2048,
-        "label": "ResNet50",
-        "hint": "python3 scripts/stage_2_embed_resnet.py",
-    },
-}
+def bind(cls: str) -> None:
+    """Point the per-class module constants at `cls` (colon_n keeps the original layout)."""
+    global P, EMBEDDINGS_DIR, RESULTS_DIR, PATHS_PATH, SOURCES, PCA_ARMS
+    P = class_paths(cls)
+    EMBEDDINGS_DIR, RESULTS_DIR = P.embeddings_dir, P.results_dir
+    PATHS_PATH = EMBEDDINGS_DIR / "paths.txt"  # shared: identical across embedding sources
 
-# PCA arms: which base arm they reduce, and where the cached reduction lives.
-PCA_ARMS = {
-    "uni_pca128": {
-        "base": "uni",
-        "path": EMBEDDINGS_DIR / "uni1_pca128.npy",
-        "meta": EMBEDDINGS_DIR / "uni1_pca128.meta.json",
-    },
-    "resnet_pca128": {
-        "base": "resnet",
-        "path": EMBEDDINGS_DIR / "resnet50_pca128.npy",
-        "meta": EMBEDDINGS_DIR / "resnet50_pca128.meta.json",
-    },
-}
+    # Base (non-PCA) arms: where the raw embedding matrix lives.
+    SOURCES = {
+        "uni": {
+            "path": EMBEDDINGS_DIR / "uni1_full.npy",
+            "dim": 1024,
+            "label": "UNI",
+            "hint": f"python3 scripts/stage_2_embed.py --cls {cls}",
+        },
+        "resnet": {
+            "path": EMBEDDINGS_DIR / "resnet50_full.npy",
+            "dim": 2048,
+            "label": "ResNet50",
+            "hint": f"python3 scripts/stage_2_embed_resnet.py --cls {cls}",
+        },
+    }
+
+    # PCA arms: which base arm they reduce, and where the cached reduction lives.
+    PCA_ARMS = {
+        "uni_pca128": {
+            "base": "uni",
+            "path": EMBEDDINGS_DIR / "uni1_pca128.npy",
+            "meta": EMBEDDINGS_DIR / "uni1_pca128.meta.json",
+        },
+        "resnet_pca128": {
+            "base": "resnet",
+            "path": EMBEDDINGS_DIR / "resnet50_pca128.npy",
+            "meta": EMBEDDINGS_DIR / "resnet50_pca128.meta.json",
+        },
+    }
+
+
+bind(DEFAULT_CLASS)
 
 # Neutral ink: text never wears a series color.
 INK = "#1f2328"
@@ -121,7 +130,7 @@ def output_dir(arm: str) -> Path:
 
 
 def marker_path(arm: str) -> Path:
-    return MARKERS_DIR / f"stage_3_kmeans_{arm}.done"
+    return P.marker(f"stage_3_kmeans_{arm}")
 
 
 # --------------------------------------------------------------------------- #
@@ -430,7 +439,7 @@ def plot_spot_check(arm: str, labels: np.ndarray, sizes: np.ndarray, paths: list
                 thumbnail = handle.convert("RGB")
                 thumbnail.thumbnail((THUMBNAIL_PX, THUMBNAIL_PX))
                 axis.imshow(thumbnail)
-            axis.set_xlabel(paths[index].stem.replace("colon_n_", "#"), fontsize=7, color=INK_MUTED)
+            axis.set_xlabel(paths[index].stem.replace(P.file_prefix, "#"), fontsize=7, color=INK_MUTED)
             for spine in axis.spines.values():
                 spine.set_color("#d8dee4")
 
@@ -457,6 +466,7 @@ def write_marker(arm: str, metrics: dict, out_dir: Path) -> None:
 
     payload = {
         "stage": "stage_3_kmeans",
+        "class": P.cls,
         "embedding": arm,
         "completed": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "k": K,
@@ -480,11 +490,13 @@ def main() -> int:
         default="uni",
         help="default: %(default)s",
     )
+    add_cls_arg(parser)
     parser.add_argument("--force", action="store_true", help="rerun even if the completion marker exists")
     args = parser.parse_args()
     arm = args.embedding
+    bind(args.cls)
 
-    ensure_dirs()
+    ensure_dirs(P)
     out_dir = output_dir(arm)
     out_dir.mkdir(parents=True, exist_ok=True)
 

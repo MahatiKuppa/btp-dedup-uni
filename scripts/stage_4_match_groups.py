@@ -5,6 +5,7 @@ Run from the project root:
 
     python3 scripts/stage_4_match_groups.py
     python3 scripts/stage_4_match_groups.py --force     # rerun despite the marker
+    python3 scripts/stage_4_match_groups.py --cls colon_aca
 
 Hashes (sha256) every image in data/raw/colon_n (ours, colon_n_NNNN.jpeg) and
 data/raw_tampapath/colon_n (original LC25000 names), builds a 1:1 mapping by hash,
@@ -32,13 +33,11 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from common.project import (  # noqa: E402
-    GROUP_MAP_CSV,
     GROUPS_CSV,
-    MARKERS_DIR,
     N_EXPECTED,
-    ORIGINAL_DIR,
     PROJECT_ROOT,
-    RAW_DIR,
+    add_cls_arg,
+    class_paths,
     die,
     ensure_dirs,
     list_images,
@@ -46,9 +45,7 @@ from common.project import (  # noqa: E402
     write_json_atomic,
 )
 
-LABEL = "colon_n"
 THEIR_SUFFIXES = (".jpeg", ".jpg")  # skips the *:Zone.Identifier files WSL leaves behind
-MARKER = MARKERS_DIR / "stage_4_match_groups.done"
 
 
 def hash_folder(paths: list[Path], side: str) -> dict[str, list[str]]:
@@ -65,16 +62,21 @@ def hash_folder(paths: list[Path], side: str) -> dict[str, list[str]]:
     return by_hash
 
 
-def their_images() -> list[Path]:
-    return sorted(p for p in ORIGINAL_DIR.iterdir() if p.is_file() and p.suffix.lower() in THEIR_SUFFIXES)
+def their_images(original_dir: Path) -> list[Path]:
+    return sorted(p for p in original_dir.iterdir() if p.is_file() and p.suffix.lower() in THEIR_SUFFIXES)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    add_cls_arg(parser)
     parser.add_argument("--force", action="store_true", help="rerun even if the completion marker exists")
     args = parser.parse_args()
 
-    ensure_dirs()
+    P = class_paths(args.cls)
+    RAW_DIR, ORIGINAL_DIR, GROUP_MAP_CSV, LABEL = P.raw_dir, P.original_dir, P.group_map_csv, P.cls
+    MARKER = P.marker("stage_4_match_groups")
+
+    ensure_dirs(P)
     if not args.force and MARKER.exists() and GROUP_MAP_CSV.exists():
         print("already done (stage 4), skipping")
         return 0
@@ -86,7 +88,8 @@ def main() -> int:
         die(f"missing ground-truth CSV {GROUPS_CSV}")
 
     mine = list_images(RAW_DIR)
-    theirs = their_images()
+    theirs = their_images(ORIGINAL_DIR)
+    print(f"[class] {LABEL}")
     print(f"[data] mine: {len(mine)} files | theirs: {len(theirs)} files (images only)")
     if len(mine) != N_EXPECTED or len(theirs) != N_EXPECTED:
         die(f"expected {N_EXPECTED} files on both sides, found mine={len(mine)} theirs={len(theirs)}")
@@ -187,6 +190,7 @@ def main() -> int:
         MARKER,
         {
             "completed": datetime.now().isoformat(timespec="seconds"),
+            "class": LABEL,
             "n_rows": len(out),
             "n_ambiguous_their_filename": len(ambiguous),
             "n_groups": int(sizes.size),

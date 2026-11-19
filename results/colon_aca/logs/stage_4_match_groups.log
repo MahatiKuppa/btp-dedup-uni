@@ -1,0 +1,29 @@
+[class] colon_aca
+[data] mine: 5000 files | theirs: 5000 files (images only)
+[hash] mine: 1000/5000
+[hash] mine: 2000/5000
+[hash] mine: 3000/5000
+[hash] mine: 4000/5000
+[hash] mine: 5000/5000
+[hash] mine: 5000 files, 4753 unique hashes in 0.4s | 242 hashes shared by 489 files
+[hash] theirs: 1000/5000
+[hash] theirs: 2000/5000
+[hash] theirs: 3000/5000
+[hash] theirs: 4000/5000
+[hash] theirs: 5000/5000
+[hash] theirs: 5000 files, 4753 unique hashes in 1.4s | 242 hashes shared by 489 files
+[match] every hash matches with equal multiplicity (4753 unique hashes)
+[match] 5000 files mapped | 489 ambiguous their_filename (byte-identical duplicates; group_id unaffected if identical across the set)
+[csv] 5000 rows with label == 'colon_aca'
+[check] every byte-identical duplicate set lies in a single group_id
+[out] wrote embeddings/colon_aca/my_filename_to_group_id.csv (5000, 5)
+
+[groups] distinct group_id : 249
+[groups] group size        : min=6 max=34 mean=20.08
+[groups] singleton groups  : 0
+[groups] size histogram    : {6: 1, 9: 1, 10: 2, 11: 3, 12: 2, 13: 7, 14: 5, 15: 12, 16: 24, 17: 22, 18: 23, 19: 21, 20: 15, 21: 20, 22: 19, 23: 22, 24: 8, 25: 11, 26: 8, 27: 4, 28: 6, 29: 4, 30: 3, 31: 1, 32: 2, 33: 2, 34: 1}
+[groups] group_id vs local_cluster_label for colon_aca: IDENTICAL
+[groups] group_id range 0..248, local_cluster_label range 0..248
+
+[out] wrote markers/stage_4_match_groups_colon_aca.done
+[done] stage 4 complete

@@ -1,0 +1,2 @@
+embedding,dim,k,n_images,intra_variance,inter_variance,separation_ratio,size_min,size_max,size_mean,size_std,n_small_lt5,n_large_gt40
+resnet,2048,250,5000,0.13039603271484376,0.5727399521696867,4.392311178839172,4,62,20.0,8.669486720677297,1,8

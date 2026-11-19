@@ -1,0 +1,21 @@
+/home/mahati/btp_dedup_uni/venv/lib/python3.12/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+[data] loaded embeddings/colon_aca/uni1_full.npy (5000, 1024) (L2-normalized rows)
+[kmeans] k=250 random_state=42 n_init=10 on (5000, 1024) ...
+[kmeans] converged in 24.2s | inertia 591.6302
+[out] wrote results/colon_aca/kmeans_uni/labels.npy (5000,) and results/colon_aca/kmeans_uni/centers.npy (250, 1024)
+
+[sizes] min=5 max=45 mean=20.00 std=6.01
+[sizes] 0 clusters with <5 members | 1 clusters with >40 members
+[metrics] intra-cluster variance : 0.118326  (mean squared distance to own center)
+[metrics] inter-cluster variance : 0.778076  (mean squared distance between centers)
+[metrics] separation ratio       : 6.5757  (inter/intra, higher is better)
+
+[out] wrote results/colon_aca/kmeans_uni/cluster_sizes.csv and results/colon_aca/kmeans_uni/metrics.csv
+[umap] n_neighbors=15 min_dist=0.1 metric=cosine random_state=42 (first call pays a numba JIT compile; random_state forces single-threaded layout)
+[umap] done in 17.2s | wrote results/colon_aca/kmeans_uni/umap_coords.npy (5000, 2)
+[out] wrote results/colon_aca/kmeans_uni/umap_clusters.png (1800x1350)
+[spot] clusters: 19 (n=5, smallest), 3 (n=20, ~average, target 20), 16 (n=45, largest)
+[out] wrote results/colon_aca/kmeans_uni/spot_check.png
+[out] wrote markers/stage_3_kmeans_uni_colon_aca.done
+[done] stage 3 (uni) complete

@@ -1,0 +1,23 @@
+/home/mahati/btp_dedup_uni/venv/lib/python3.12/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+[pca] fitting PCA(128) on (5000, 1024) ...
+[pca] fitted in 1.3s | wrote embeddings/colon_aca/uni1_pca128.npy (5000, 128)
+[pca] cumulative explained variance: 0.8806 (88.06% of the original 1024-d variance in 128 components)
+[kmeans] k=250 random_state=42 n_init=10 on (5000, 128) ...
+[kmeans] converged in 2.3s | inertia 398.8111
+[out] wrote results/colon_aca/kmeans_uni_pca128/labels.npy (5000,) and results/colon_aca/kmeans_uni_pca128/centers.npy (250, 128)
+
+[sizes] min=6 max=51 mean=20.00 std=6.19
+[sizes] 0 clusters with <5 members | 1 clusters with >40 members
+[metrics] intra-cluster variance : 0.079762  (mean squared distance to own center)
+[metrics] inter-cluster variance : 0.731285  (mean squared distance between centers)
+[metrics] separation ratio       : 9.1683  (inter/intra, higher is better)
+
+[out] wrote results/colon_aca/kmeans_uni_pca128/cluster_sizes.csv and results/colon_aca/kmeans_uni_pca128/metrics.csv
+[umap] n_neighbors=15 min_dist=0.1 metric=cosine random_state=42 (first call pays a numba JIT compile; random_state forces single-threaded layout)
+[umap] done in 15.8s | wrote results/colon_aca/kmeans_uni_pca128/umap_coords.npy (5000, 2)
+[out] wrote results/colon_aca/kmeans_uni_pca128/umap_clusters.png (1800x1350)
+[spot] clusters: 172 (n=6, smallest), 4 (n=20, ~average, target 20), 118 (n=51, largest)
+[out] wrote results/colon_aca/kmeans_uni_pca128/spot_check.png
+[out] wrote markers/stage_3_kmeans_uni_pca128_colon_aca.done
+[done] stage 3 (uni_pca128) complete

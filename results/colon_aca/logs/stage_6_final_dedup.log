@@ -1,0 +1,6 @@
+[sharp] Laplacian variance via PIL + numpy on 5000 images ...
+[out] copied 249 representatives to data/final/colon_aca
+[out] wrote data/final/colon_aca_manifest.csv (249, 4)
+[check] file count 249 == distinct group_id 249
+[out] wrote markers/stage_6_final_dedup_colon_aca.done
+[done] stage 6 complete

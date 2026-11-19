@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Stage 2 - embed LC25000 colon-benign tiles with UNI (ViT-L/16, 1024-d).
+"""Stage 2 - embed LC25000 colon tiles (--cls colon_n | colon_aca) with UNI (ViT-L/16, 1024-d).
 
 Run from the project root:
 
     python scripts/stage_2_embed.py
 
-If data/raw/colon_n/ does not hold exactly 5000 .jpeg files, the colon/benign
+If data/raw/<cls>/ does not hold exactly 5000 .jpeg files, the colon/<hf label>
 subset of the HF dataset '1aurent/LC25000' is downloaded first (original JPEG
 bytes, no re-encode). Embedding checkpoints every 500 images; an interrupted
 run resumes where it stopped.
@@ -31,11 +31,11 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from common.project import (  # noqa: E402
-    EMBEDDINGS_DIR,
-    MARKERS_DIR,
+    DEFAULT_CLASS,
     N_EXPECTED,
     PROJECT_ROOT,
-    RAW_DIR,
+    add_cls_arg,
+    class_paths,
     configure_hf_env,
     die,
     ensure_dirs,
@@ -55,17 +55,25 @@ EMBED_DIM = 1024
 
 DATASET_ID = "1aurent/LC25000"
 ORGAN = "colon"
-LABEL = "benign"
 
 CHECKPOINT_EVERY = 500
 DEFAULT_BATCH_SIZE = 8
 DEFAULT_WORKERS = 4
 
-FINAL_PATH = EMBEDDINGS_DIR / "uni1_full.npy"
-PATHS_PATH = EMBEDDINGS_DIR / "paths.txt"
-PARTIAL_PATH = EMBEDDINGS_DIR / "_partial_uni1.npy"
-META_PATH = EMBEDDINGS_DIR / "_partial_uni1.meta.json"
-MARKER_PATH = MARKERS_DIR / "stage_2_embed.done"
+
+def bind(cls: str) -> None:
+    """Point the per-class module constants at `cls` (colon_n keeps the original layout)."""
+    global P, RAW_DIR, EMBEDDINGS_DIR, FINAL_PATH, PATHS_PATH, PARTIAL_PATH, META_PATH, MARKER_PATH
+    P = class_paths(cls)
+    RAW_DIR, EMBEDDINGS_DIR = P.raw_dir, P.embeddings_dir
+    FINAL_PATH = EMBEDDINGS_DIR / "uni1_full.npy"
+    PATHS_PATH = EMBEDDINGS_DIR / "paths.txt"
+    PARTIAL_PATH = EMBEDDINGS_DIR / "_partial_uni1.npy"
+    META_PATH = EMBEDDINGS_DIR / "_partial_uni1.meta.json"
+    MARKER_PATH = P.marker("stage_2_embed")
+
+
+bind(DEFAULT_CLASS)
 
 
 # --------------------------------------------------------------------------- #
@@ -85,7 +93,7 @@ def already_done() -> bool:
 # data
 # --------------------------------------------------------------------------- #
 def ensure_images(token: str) -> list[Path]:
-    images = list_images()
+    images = list_images(RAW_DIR)
     if len(images) == N_EXPECTED:
         print(f"[data] found {N_EXPECTED} images in {RAW_DIR.relative_to(PROJECT_ROOT)}/")
         return images
@@ -100,9 +108,9 @@ def ensure_images(token: str) -> list[Path]:
     else:
         print(f"[data] {RAW_DIR.relative_to(PROJECT_ROOT)}/ is empty - downloading {DATASET_ID}")
 
-    download_colon_benign(token)
+    download_class_subset(token)
 
-    images = list_images()
+    images = list_images(RAW_DIR)
     if len(images) != N_EXPECTED:
         die(
             f"after download, {RAW_DIR} holds {len(images)} .jpeg files, expected {N_EXPECTED}. "
@@ -111,7 +119,7 @@ def ensure_images(token: str) -> list[Path]:
     return images
 
 
-def download_colon_benign(token: str) -> None:
+def download_class_subset(token: str) -> None:
     from datasets import Image as HFImage
     from datasets import load_dataset
     from tqdm import tqdm
@@ -124,7 +132,10 @@ def download_colon_benign(token: str) -> None:
 
     # Resolve class ids by name; the integer encoding is not guaranteed stable.
     organ_id = dataset.features["organ"].str2int(ORGAN)
-    label_id = dataset.features["label"].str2int(LABEL)
+    label_names = dataset.features["label"].names
+    if P.hf_label not in label_names:
+        die(f"label {P.hf_label!r} not in {DATASET_ID} labels {label_names}")
+    label_id = dataset.features["label"].str2int(P.hf_label)
 
     # Raw bytes only: writing the original JPEG avoids re-encode artifacts.
     dataset = dataset.cast_column("image", HFImage(decode=False))
@@ -133,15 +144,15 @@ def download_colon_benign(token: str) -> None:
         input_columns=["organ", "label"],
         batched=True,
         batch_size=2000,
-        desc=f"filter {ORGAN}/{LABEL}",
+        desc=f"filter {ORGAN}/{P.hf_label}",
     )
     if len(subset) != N_EXPECTED:
-        die(f"{ORGAN}/{LABEL} subset of {DATASET_ID} has {len(subset)} rows, expected {N_EXPECTED}")
+        die(f"{ORGAN}/{P.hf_label} subset of {DATASET_ID} has {len(subset)} rows, expected {N_EXPECTED}")
 
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     written = skipped = 0
     for index, record in enumerate(tqdm(subset, desc="writing jpegs", unit="img")):
-        destination = RAW_DIR / f"colon_n_{index:04d}.jpeg"
+        destination = RAW_DIR / f"{P.file_prefix}{index:04d}.jpeg"
         if destination.exists() and destination.stat().st_size > 0:
             skipped += 1
             continue
@@ -369,6 +380,7 @@ def write_marker(total: int) -> None:
     write_json_atomic(
         MARKER_PATH,
         {
+            "class": P.cls,
             "stage": "stage_2_embed",
             "completed": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "model": MODEL_NAME,
@@ -411,13 +423,15 @@ def benchmark(images: list[Path], model, transform, batch_size: int, workers: in
 # --------------------------------------------------------------------------- #
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    add_cls_arg(parser)
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE, help="default: %(default)s")
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS, help="DataLoader workers, default: %(default)s")
     parser.add_argument("--threads", type=int, default=None, help="torch intra-op threads, default: cores - workers")
     parser.add_argument("--limit", type=int, default=None, help="benchmark only: time N images, write nothing")
     args = parser.parse_args()
+    bind(args.cls)
 
-    ensure_dirs()
+    ensure_dirs(P)
     configure_hf_env()
 
     if args.limit is None and already_done():

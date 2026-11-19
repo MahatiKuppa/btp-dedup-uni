@@ -8,21 +8,81 @@ import os
 import sys
 import tempfile
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable, TypeVar
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-RAW_DIR = PROJECT_ROOT / "data" / "raw" / "colon_n"
-EMBEDDINGS_DIR = PROJECT_ROOT / "embeddings"
 MARKERS_DIR = PROJECT_ROOT / "markers"
-RESULTS_DIR = PROJECT_ROOT / "results"
 HF_CACHE_DIR = PROJECT_ROOT / ".hf_cache"
-ORIGINAL_DIR = PROJECT_ROOT / "data" / "raw_tampapath" / "colon_n"  # original LC25000 file names
 GROUPS_CSV = PROJECT_ROOT / "data" / "lc25000_image_groups.csv"  # ground-truth group labels, all 25k images
-FINAL_DIR = PROJECT_ROOT / "data" / "final" / "colon_n"
-FINAL_MANIFEST = PROJECT_ROOT / "data" / "final" / "colon_n_manifest.csv"
-GROUP_MAP_CSV = EMBEDDINGS_DIR / "my_filename_to_group_id.csv"
-COMPARISON_CSV = RESULTS_DIR / "ground_truth_comparison.csv"
+
+CLASSES = ("colon_n", "colon_aca")
+DEFAULT_CLASS = "colon_n"
+# LC25000 class name -> HF dataset label name (organ is "colon" for both)
+HF_LABELS = {"colon_n": "benign", "colon_aca": "adenocarcinomas"}
+
+
+@dataclass(frozen=True)
+class ClassPaths:
+    """Every per-class path. colon_n keeps the original un-namespaced layout."""
+
+    cls: str
+    raw_dir: Path
+    original_dir: Path  # original LC25000 file names
+    embeddings_dir: Path
+    results_dir: Path
+    final_dir: Path
+    final_manifest: Path
+    group_map_csv: Path
+    comparison_csv: Path
+    marker_suffix: str
+    file_prefix: str  # our renamed tiles: <prefix>NNNN.jpeg
+    hf_label: str
+
+    def marker(self, name: str) -> Path:
+        return MARKERS_DIR / f"{name}{self.marker_suffix}.done"
+
+
+def class_paths(cls: str = DEFAULT_CLASS) -> ClassPaths:
+    if cls not in CLASSES:
+        raise ValueError(f"unknown class {cls!r}, expected one of {CLASSES}")
+    data = PROJECT_ROOT / "data"
+    if cls == "colon_n":
+        embeddings, results, suffix = PROJECT_ROOT / "embeddings", PROJECT_ROOT / "results", ""
+    else:
+        embeddings, results = PROJECT_ROOT / "embeddings" / cls, PROJECT_ROOT / "results" / cls
+        suffix = f"_{cls}"
+    return ClassPaths(
+        cls=cls,
+        raw_dir=data / "raw" / cls,
+        original_dir=data / "raw_tampapath" / cls,
+        embeddings_dir=embeddings,
+        results_dir=results,
+        final_dir=data / "final" / cls,
+        final_manifest=data / "final" / f"{cls}_manifest.csv",
+        group_map_csv=embeddings / "my_filename_to_group_id.csv",
+        comparison_csv=results / "ground_truth_comparison.csv",
+        marker_suffix=suffix,
+        file_prefix=f"{cls}_",
+        hf_label=HF_LABELS[cls],
+    )
+
+
+def add_cls_arg(parser) -> None:
+    parser.add_argument("--cls", choices=CLASSES, default=DEFAULT_CLASS, help="LC25000 class, default: %(default)s")
+
+
+# colon_n defaults, kept for callers that predate --cls
+_DEFAULT = class_paths(DEFAULT_CLASS)
+RAW_DIR = _DEFAULT.raw_dir
+EMBEDDINGS_DIR = _DEFAULT.embeddings_dir
+RESULTS_DIR = _DEFAULT.results_dir
+ORIGINAL_DIR = _DEFAULT.original_dir
+FINAL_DIR = _DEFAULT.final_dir
+FINAL_MANIFEST = _DEFAULT.final_manifest
+GROUP_MAP_CSV = _DEFAULT.group_map_csv
+COMPARISON_CSV = _DEFAULT.comparison_csv
 
 IMAGE_SUFFIX = ".jpeg"
 N_EXPECTED = 5000
@@ -30,8 +90,8 @@ N_EXPECTED = 5000
 T = TypeVar("T")
 
 
-def ensure_dirs() -> None:
-    for directory in (RAW_DIR, EMBEDDINGS_DIR, MARKERS_DIR, HF_CACHE_DIR):
+def ensure_dirs(paths: ClassPaths = _DEFAULT) -> None:
+    for directory in (paths.raw_dir, paths.embeddings_dir, MARKERS_DIR, HF_CACHE_DIR):
         directory.mkdir(parents=True, exist_ok=True)
 
 
