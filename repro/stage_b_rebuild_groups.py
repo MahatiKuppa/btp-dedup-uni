@@ -7,9 +7,13 @@ from collections import Counter
 
 import numpy as np
 
-ROOT = os.path.expanduser('~/btp_dedup_uni')
-ANN = f'{ROOT}/third_party/LC25000-clean/annotations/colon_n/UNI/resize_only'
-OUT = f'{ROOT}/repro/out/phase2'
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cls import parse  # noqa: E402
+
+args, P = parse(__doc__)
+ANN = P.ann
+OUT = P.phase2
 os.makedirs(OUT, exist_ok=True)
 NUM_CLASS_PROTOTYPES = 250  # source.constants
 

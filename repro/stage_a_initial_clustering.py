@@ -1,8 +1,8 @@
 """Phase 1: initial clustering exactly as notebook 2 (automated part), compared with the upstream annotation.
 
-Run from anywhere:  venv_repro/bin/python repro/stage_a_initial_clustering.py
-Reads (read-only): upstream feature_vectors/ + annotations/colon_n/UNI/resize_only/.
-Writes only to repro/out/initial/.
+Run from anywhere:  venv_repro/bin/python repro/stage_a_initial_clustering.py [--cls colon_aca] [--umap-dim N]
+Reads (read-only): upstream feature_vectors/ + annotations/<cls>/UNI/resize_only/.
+Writes only to repro/out/[<cls>/]initial/ (initial_umap<N>/ when N differs from their .pkl's UMAP dimension).
 """
 import json
 import os
@@ -17,17 +17,23 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_mutual_info_score, adjusted_rand_score
 from sklearn.metrics.pairwise import euclidean_distances
 
-ROOT = os.path.expanduser('~/btp_dedup_uni')
-UP = f'{ROOT}/third_party/LC25000-clean'
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cls import ROOT, UP, parse  # noqa: E402
+
+args, P = parse(__doc__, umap_dim=True)
+D = P.umap_dim  # my UMAP dimension (their saved .pkl: P.their_dim)
 sys.path.insert(0, UP)
 from source.constants import NUM_CLASS_PROTOTYPES, RANDOM_SEED  # noqa: E402
 from source.eval_utils import (get_clustering_centroids, get_clustering_labels,  # noqa: E402
                                reduce_feature_dimensionality)
 
-FEAT = f'{UP}/feature_vectors/colon_n/UNI/resize_only'
-ANN = f'{UP}/annotations/colon_n/UNI/resize_only'
-OUT = f'{ROOT}/repro/out/initial'
+FEAT = P.feat
+ANN = P.ann
+OUT = P.initial
 os.makedirs(OUT, exist_ok=True)
+if P.cls != 'colon_n':
+    json.dump({'cls': P.cls, 'my_umap_dim': D, 'their_umap_dim': P.their_dim}, open(f'{OUT}/run_info.json', 'w'))
+print(f'class {P.cls}: my UMAP-{D}, their pkl UMAP-{P.their_dim}, output {OUT}')
 
 
 def sizes(labels):
@@ -63,7 +69,7 @@ def anchors_of(feats_reduced, labels):
 
 
 def umap_kmeans(features, umap_seed, km_seed):
-    red = umap.UMAP(n_components=8, random_state=umap_seed).fit_transform(features)
+    red = umap.UMAP(n_components=D, random_state=umap_seed).fit_transform(features)
     lab = KMeans(n_clusters=NUM_CLASS_PROTOTYPES, random_state=km_seed).fit_predict(red)
     return red, lab
 
@@ -79,7 +85,7 @@ print('features', features.shape, features.dtype)
 # ---------------------------------------------------------------- their pkl + their recorded initial clustering
 with warnings.catch_warnings(record=True) as w:
     warnings.simplefilter('always')
-    with open(f'{ANN}/distance_metric=euclidean#dimensionality_reduction=UMAP-8#clustering=kmeans.pkl', 'rb') as f:
+    with open(P.pkl, 'rb') as f:
         theirs = pickle.load(f)
 their_sklearn = next((str(x.message).split('from version ')[1].split(' when')[0] for x in w
                       if 'InconsistentVersionWarning' in type(x.message).__name__), 'unknown')
@@ -99,7 +105,7 @@ print('their pkl labels (in MY id order) == labels recorded in results_processed
 their_anchor_paths = set(rp.keys())
 
 # ---------------------------------------------------------------- my run, exactly as notebook 2
-red = reduce_feature_dimensionality(features, 'UMAP-8')
+red = reduce_feature_dimensionality(features, f'UMAP-{D}')
 my_labels, my_model = get_clustering_labels(red, NUM_CLASS_PROTOTYPES, 'kmeans', RANDOM_SEED, return_model=True)
 cents, anchors = anchors_of(red, my_labels)
 my_anchor_paths = {paths[i] for i in anchors.values()}

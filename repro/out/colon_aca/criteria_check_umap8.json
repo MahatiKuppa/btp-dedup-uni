@@ -1,0 +1,59 @@
+{
+ "clusters": {
+  "my_seed42_ARI_vs_their_pkl": 0.9691592345338395,
+  "floors": {
+   "combined (UMAP+KMeans seeds 0..9)": {
+    "mean": 0.9785094013353369,
+    "sd": 0.004334625644428123,
+    "lo": 0.9698401500464807,
+    "hi": 0.9871786526241931,
+    "pass": false
+   },
+   "UMAP-only (KMeans fixed 42)": {
+    "mean": 0.980475157735992,
+    "sd": 0.004408197122537909,
+    "lo": 0.9716587634909162,
+    "hi": 0.9892915519810679,
+    "pass": false
+   },
+   "KMeans-only (UMAP fixed 42)": {
+    "mean": 0.9817211870619142,
+    "sd": 0.004481820255463605,
+    "lo": 0.972757546550987,
+    "hi": 0.9906848275728415,
+    "pass": false
+   }
+  },
+  "pass_all": false
+ },
+ "features": {
+  "precision@1": {
+   "theirs": 1.0,
+   "mine": 1.0,
+   "delta": 0.0,
+   "bar": 0.002,
+   "pass": true
+  },
+  "precision@5": {
+   "theirs": 0.9992,
+   "mine": 0.99916,
+   "delta": -3.999999999992898e-05,
+   "bar": 0.002,
+   "pass": true
+  },
+  "Adjusted Rand Index (ARI)": {
+   "theirs": 0.8955118869799406,
+   "mine": 0.923180300876584,
+   "delta": 0.02766841389664343,
+   "bar": 0.005,
+   "pass": false
+  },
+  "Fowlkes-Mallows Index": {
+   "theirs": 0.8966362352309741,
+   "mine": 0.923719044439683,
+   "delta": 0.02708280920870887,
+   "bar": 0.005,
+   "pass": false
+  }
+ }
+}

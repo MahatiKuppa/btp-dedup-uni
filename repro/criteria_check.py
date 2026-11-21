@@ -1,7 +1,11 @@
 """Evaluate the reproduction criteria in repro/CRITERIA.md against stored results. Prints a table, writes repro/out/criteria_check.json."""
-import json, numpy as np
-O = 'repro/out/'
-p1 = json.load(open(O + 'initial/phase1_metrics.json')); um = json.load(open(O + 'initial/noise_umap_only.json'))
+import json, os, sys, numpy as np
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cls import parse
+args, P = parse(__doc__, umap_dim=True)
+O = P.out + '/'
+INIT = P.initial + '/'
+p1 = json.load(open(INIT + 'phase1_metrics.json')); um = json.load(open(INIT + 'noise_umap_only.json'))
 my42_vs_theirs = p1['my_vs_theirs']['ARI']
 floors = {'combined (UMAP+KMeans seeds 0..9)': (p1['noise_full_pipeline']['ARI_among_own_mean'], p1['noise_full_pipeline']['ARI_among_own_sd']),
           'UMAP-only (KMeans fixed 42)': (um['ARI_among_own_mean'], um['ARI_among_own_sd']),
@@ -18,7 +22,7 @@ for row in csv.DictReader(open(O + 'phase3_uni_resize_only_row.csv')):
 bars = {'precision@1': 0.002, 'precision@5': 0.002, 'Adjusted Rand Index (ARI)': 0.005, 'Fowlkes-Mallows Index': 0.005}
 for m, b in bars.items():
     t, mi, d = r[m]; out['features'][m] = {'theirs': t, 'mine': mi, 'delta': d, 'bar': b, 'pass': bool(abs(d) <= b)}
-json.dump(out, open(O + 'criteria_check.json', 'w'), indent=1)
+json.dump(out, open(O + ('criteria_check.json' if P.umap_dim == P.their_dim else f'criteria_check_umap{P.umap_dim}.json'), 'w'), indent=1)
 print(f"clusters: my seed-42 ARI vs their pkl = {my42_vs_theirs:.4f}")
 for k, v in out['clusters']['floors'].items():
     print(f"  {k}: {v['mean']:.4f} +- {v['sd']:.4f} -> [{v['lo']:.4f}, {v['hi']:.4f}]  {'PASS' if v['pass'] else 'FAIL'}")

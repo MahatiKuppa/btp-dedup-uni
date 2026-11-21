@@ -1,0 +1,7 @@
+{
+ "identical_clusters": 223,
+ "anchor_equal_within_identical": 18,
+ "their_anchor_in_matched_my_cluster": 242,
+ "their_clusters_with_any_rejection": 6,
+ "their_rejected_images": 58
+}

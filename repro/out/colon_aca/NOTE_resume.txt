@@ -1,0 +1,2 @@
+# 3a attempt 1 was killed when the Claude session ended (UNI imagenet at 14%, 00:16 on 2026-11-20, nothing saved); resumed 2026-11-21
+# 3a attempt 2 (resume 1) was killed at 93% (08:01 on 2026-11-21) when the session ended again; resumed under a user-level systemd service
