@@ -1,0 +1,22 @@
+{
+    "prov-gigapath#imagenet#euclidean#NoReduction#kmeans": {
+        "TN": 12435611,
+        "FP": 11420,
+        "FN": 8851,
+        "TP": 41618,
+        "Accuracy": 0.9983779955991198,
+        "Precision": 0.784682680342396,
+        "Recall": 0.8246250173373754,
+        "F1 Score": 0.8041581728771966,
+        "Specificity": 0.9990825121267876,
+        "Balanced Accuracy": 0.9118537647320815,
+        "Fowlkes-Mallows Index": 0.8044059726790238,
+        "Adjusted Rand Index (ARI)": 0.8033443020122062,
+        "Normalized Mutual Information (NMI)": 0.9554815860797942,
+        "Homogeneity": 0.9533997538598811,
+        "Completeness": 0.9575725299232629,
+        "V-Measure": 0.9554815860797942,
+        "precision@1": 0.9996,
+        "precision@5": 0.99772
+    }
+}

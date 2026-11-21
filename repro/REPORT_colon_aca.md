@@ -1,7 +1,8 @@
 # Reproduction of Batchkala, Li & Rittscher (LC25000-clean) on colon_aca, next to colon_n
 
 Same upstream commit `912f342`, same `venv_repro`, same patches as `repro/PATCHES.md` (none to upstream source), same criteria and thresholds as `repro/CRITERIA.md`.
-colon_n columns are read from the existing colon_n outputs and never recomputed. Prov-Gigapath is not run here (Colab, later): its row is empty.
+colon_n columns are read from the existing colon_n outputs and never recomputed.
+Prov-GigaPath is the 12th benchmark combo; its features come from a Colab T4 GPU run (provenance and caveat in sections 4 and 12).
 
 ## 0. Setup
 
@@ -84,20 +85,33 @@ colon_n columns are read from the existing colon_n outputs and never recomputed.
 | UNI#resize_only | 0.8955 | 0.9232 | +0.0277 | +0.0271 | +0.0000 | -0.0000 | FAIL | +0.0058 | FAIL |
 | UNI#imagenet | 0.8218 | 0.8109 | -0.0109 | -0.0106 | +0.0000 | -0.0000 | FAIL | +0.0155 | FAIL |
 | simclr-tcga-lung_resnet18-2.5x#imagenet | 0.6197 | 0.6115 | -0.0082 | -0.0076 | +0.0000 | +0.0001 | FAIL | -0.0158 | FAIL |
-| prov-gigapath#imagenet | 0.7937 | — | — | — | — | — | — (Colab, later) | — (Colab, later) | — |
+| prov-gigapath#imagenet | 0.7937 | 0.8033 | +0.0096 | +0.0095 | +0.0000 | -0.0000 | FAIL (Colab GPU) | -0.0093 | FAIL (Colab GPU) |
 | owkin-phikon#resize_only | 0.5894 | 0.5765 | -0.0129 | -0.0133 | +0.0000 | -0.0001 | FAIL | -0.0057 | FAIL |
 | owkin-phikon#imagenet | 0.5202 | 0.5184 | -0.0018 | -0.0018 | +0.0000 | +0.0000 | PASS | -0.0013 | PASS |
 | dinov2_vitb14#imagenet | 0.8051 | 0.7973 | -0.0079 | -0.0079 | +0.0000 | +0.0000 | FAIL | +0.0227 | FAIL |
 | imagenet_resnet50-clam-extractor#imagenet | 0.6975 | 0.6959 | -0.0016 | -0.0015 | +0.0000 | +0.0000 | PASS | -0.0358 | FAIL |
 | dinov2_vits14#imagenet | 0.7919 | 0.7715 | -0.0203 | -0.0205 | +0.0000 | -0.0002 | FAIL | -0.0174 | FAIL |
 
-| summary over my combos | colon_aca | colon_n |
-|---|---|---|
-| P@1 and P@5 within 0.002 | 11/11 | 11/11 |
-| ARI and FMI within 0.005 | 2/11 | 1/11 |
-| mean abs ΔARI | 0.0128 | 0.0135 |
-| max abs ΔARI | 0.0277 | 0.0358 |
-| all four bars | 2/11 | 1/11 |
+| summary | colon_aca, 11 CPU combos | colon_aca, 12 (+ prov-gigapath) | colon_n, 11 CPU combos | colon_n, 12 (+ prov-gigapath) |
+|---|---|---|---|---|
+| P@1 and P@5 within 0.002 | 11/11 | 12/12 | 11/11 | 12/12 |
+| ARI and FMI within 0.005 | 2/11 | 2/12 | 1/11 | 1/12 |
+| mean abs ΔARI | 0.0128 | 0.0125 | 0.0135 | 0.0132 |
+| max abs ΔARI | 0.0277 | 0.0277 | 0.0358 | 0.0358 |
+| all four bars | 2/11 | 2/12 | 1/11 | 1/12 |
+
+### Prov-GigaPath row (Colab T4 GPU features)
+
+| metric | bar | colon_aca theirs | colon_aca mine | colon_aca delta | colon_aca result | colon_n theirs | colon_n mine | colon_n delta | colon_n result |
+|---|---|---|---|---|---|---|---|---|---|
+| precision@1 | 0.002 | 0.99960 | 0.99960 | +0.00000 | PASS | 0.99700 | 0.99700 | +0.00000 | PASS |
+| precision@5 | 0.002 | 0.99776 | 0.99772 | -0.00004 | PASS | 0.98356 | 0.98356 | +0.00000 | PASS |
+| ARI | 0.005 | 0.79370 | 0.80334 | +0.00964 | FAIL | 0.50260 | 0.49332 | -0.00928 | FAIL |
+| FMI | 0.005 | 0.79487 | 0.80441 | +0.00954 | FAIL | 0.50560 | 0.49642 | -0.00918 | FAIL |
+
+KMeans seed context (seeds 0..9, n_init default, these features): colon_aca ARI 0.8030 ± 0.0126, their ARI z = -0.74 (inside 2 sd); colon_n ARI 0.5105 ± 0.0120, z = -0.66 (inside 2 sd).
+
+**Caveat:** these features were extracted on a Colab T4 GPU (torch 2.14.1+cu130, timm 1.0.31, fp32, batch 32, upstream 912f342), unlike the other 11 combos (CPU, local `venv_repro`: torch 2.14.1+cpu, timm 1.0.30). The last float digits can differ. File hashes: `repro/gigapath_colab_sha256.txt`.
 
 ## 5. KMeans seed / n_init spread (UNI resize_only, NoReduction, seeds 0..9, scored vs their final groups)
 
@@ -123,6 +137,7 @@ Per-combo seed noise (n_init default, seeds 0..9) in context of their published 
 | owkin-phikon#resize_only | 0.5894 | 0.5943 ± 0.0166 | -0.29 | yes | +0.51 | yes |
 | simclr-tcga-lung_resnet18-10x#imagenet | 0.6759 | 0.6597 ± 0.0114 | +1.42 | yes | -0.01 | yes |
 | simclr-tcga-lung_resnet18-2.5x#imagenet | 0.6197 | 0.6202 ± 0.0153 | -0.03 | yes | +0.43 | yes |
+| prov-gigapath#imagenet | 0.7937 | 0.8030 ± 0.0126 | -0.74 | yes | -0.66 | yes |
 
 ## 6. k = 249 (their group count) vs k = 250 (UNI resize_only, scored vs their final groups)
 
@@ -224,10 +239,12 @@ colon_n timings exist only for extractions run through `run_extractions.sh`; its
 | pynndescent | 0.6.0 |
 | their .pkl sklearn | 1.4.2 |
 | upstream commit | 912f342fe2a781e847f395d79982dad4d3d425ae |
+| Prov-GigaPath (Colab T4) | torch 2.14.1+cu130, timm 1.0.31 |
 
 ## 11. colon_n integrity (hash report)
 
-- `markers/colon_n_repro_hashes_before.txt`: 5143/5143 files identical, 0 different or missing: none.
+- `markers/colon_n_repro_hashes_before.txt`: 5141/5143 files identical; 2 expected changes (`repro/COLAB_STEPS.md`, `repro/colab_gigapath.ipynb`, edited in commit 197b23c); unexpected differences or missing files: none.
+- `markers/colon_n_hashes_before.txt` (the colon_n pipeline: `embeddings/`, `results/`, `data/final`, markers): 305/305 files identical; unexpected differences: none.
 - Covered: `repro/out/**`, `repro/scratch_eval*/**`, `repro/logs/*` (top level), the `repro/*.md|txt|ipynb` docs, `install.sh`, upstream `feature_vectors/colon_n/**`, `eval_results/**`, `annotations/**`, and the 5000 colon_n originals.
 - colon_n scripts re-run with `REPRO_OUT_ROOT` against a scratch copy of `repro/out` reproduced `phase2_metrics.json`, `pre_merge_clusters.json`, `anchor_extra.json`, `criteria_check.json` and `phase3_compare.csv` byte for byte after the `--cls` change.
 - New, not checked:
@@ -235,9 +252,16 @@ colon_n timings exist only for extractions run through `run_extractions.sh`; its
   - `repro/figs/colon_n/sizes_their_initial250.png`
   - `repro/figs/colon_n/sizes_my_initial250.png`
   - `repro/figs/colon_n/sizes_my_benchmark_kmeans.png`
+  - `repro/out/colon_n/phase3_gigapath_row.csv`
+  - `repro/out/colon_n/phase3_gigapath_eval.csv`
+  - `repro/out/colon_n/phase3_gigapath_eval.json`
+  - `repro/out/colon_n/GIGAPATH_NOTE.md`
+  - `repro/gigapath_colab_sha256.txt`
+  - `third_party/LC25000-clean/feature_vectors/colon_n/prov-gigapath/imagenet/{features.npy,ids.npy,ids_2_img_paths.json} (gitignored)`
+- The Prov-GigaPath evaluation ran in `repro/scratch_eval/gigapath/<cls>/` (new, gitignored); upstream `eval_results/` and the existing `repro/scratch_eval/**` were not written.
 
 ## 12. What differs from colon_n (read before comparing numbers)
 
 - Their colon_aca initial clustering is UMAP-32; colon_n is UMAP-8. The extra UMAP-8 columns give a like-for-like row.
 - Their colon_aca review is much lighter: 58 rejected images in 6 clusters, against 265 in 38 for colon_n.
-- Prov-Gigapath was not run locally for either class (no local features for colon_n either; it needs Colab). The colon_aca row is empty by design.
+- Prov-GigaPath features (both classes) come from a Colab T4 GPU run, the other 11 combos from local CPU runs; see the caveat under the Prov-GigaPath table in section 4.

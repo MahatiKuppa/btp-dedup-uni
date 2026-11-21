@@ -1,0 +1,8 @@
+# Prov-GigaPath features extracted on Colab (relative to data/gigapath_out/). Printed by repro/colab_gigapath.ipynb.
+# GPU: Tesla T4 | torch 2.14.1+cu130 | timm 1.0.31 | fp32 | batch 32 | upstream 912f342fe2a781e847f395d79982dad4d3d425ae | zip sha256 matched for both classes
+2b543dd66cac596e0e11cbfa638c2be387c19f72df390fbccf4ca0f4fa5c8543  colon_n/features.npy
+fa931aacfe7d76190bf0f51c3de8a0b312bd39c9cb16e83b0464bd2f6829b014  colon_n/ids.npy
+8f4ac2178c3da56559eb0a80f9ddab0e67c8c884a7e65edc8e23a56b964c7520  colon_n/ids_2_img_paths.json
+251aff200a3e756c04fbf35d2f5eeaeaf12ce79d7eb93cf0bd65f04630e558a0  colon_aca/features.npy
+fa931aacfe7d76190bf0f51c3de8a0b312bd39c9cb16e83b0464bd2f6829b014  colon_aca/ids.npy
+85c1b2c823989ae5c8327c2ff9fa41417d998f693fe4c5875ac10c6726903362  colon_aca/ids_2_img_paths.json
