@@ -1,0 +1,5 @@
+cls,splitter,n_images,n_groups,n_splits,pct_groups_both_sides_mean,pct_groups_both_sides_sd,pct_test_images_leaked_mean,pct_test_images_leaked_sd,pct_test_images_mean
+colon_n,random,5000,257,1000,94.85408560311284,0.899305610816738,99.8635,0.11282943091445909,20.0
+colon_n,group,5000,257,1000,0.0,0.0,0.0,0.0,20.239480000000004
+colon_aca,random,5000,249,1000,98.12088353413655,0.8157737803518308,100.0,0.0,20.0
+colon_aca,group,5000,249,1000,0.0,0.0,0.0,0.0,20.077239999999996
